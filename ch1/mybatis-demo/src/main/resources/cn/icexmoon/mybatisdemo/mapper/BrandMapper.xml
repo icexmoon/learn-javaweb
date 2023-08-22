@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.icexmoon.mybatisdemo.mapper.BrandMapper">
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `tb_brand`
+        (`brand_name`, `company_name`, `ordered`, `description`, `status`)
+        VALUES (#{brandName}, #{companyName}, #{ordered}, #{description}, #{status});
+    </insert>
+    <update id="update">
+        UPDATE `tb_brand`
+        <set>
+            <if test="companyName!=null and companyName!=''">
+                `company_name` = #{companyName} ,
+            </if>
+            <if test="brandName!=null and brandName!=''">
+                `brand_name` = #{brandName}
+            </if>
+            <if test="ordered!=null">
+                `ordered` = #{ordered} ,
+            </if>
+            <if test="description!=null and description!=''">
+                `description` = #{description} ,
+            </if>
+            <if test="status!=null">
+                `status` = #{status}
+            </if>
+        </set>
+        WHERE `id` = #{id};
+    </update>
+    <delete id="deleteById">
+        delete from tb_brand
+        where id=#{id}
+    </delete>
+    <delete id="deleteByIds">
+        delete from tb_brand
+        where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+           #{id}
+        </foreach>
+    </delete>
+    <select id="selectAll" resultMap="brandResultMap">
+        select * from tb_brand where id <![CDATA[
+            >
+        ]]> 0;
+    </select>
+    <select id="selectOneById" resultMap="brandResultMap">
+        select * from tb_brand where id=#{id}
+    </select>
+    <select id="selectByConditions" resultMap="brandResultMap">
+        select * from tb_brand
+        where 1=1
+        <if test="status!=null">
+            and status=#{status}
+        </if>
+        <if test="companyName!=null and companyName!=''">
+            and company_name like CONCAT('%',#{companyName},'%')
+        </if>
+        <if test="brandName!=null and brandName!=''">
+            and brand_name like CONCAT('%',#{brandName},'%')
+        </if>
+    </select>
+    <select id="selectByOneCondition" resultMap="brandResultMap">
+        select * from tb_brand
+        where
+        <choose>
+            <when test="status!=null">
+                status=#{status}
+            </when>
+            <when test="companyName!=null and companyName!=''">
+                company_name like CONCAT('%',#{companyName},'%')
+            </when>
+            <when test="brandName!=null and brandName!=''">
+                brand_name like CONCAT('%',#{brandName},'%')
+            </when>
+            <otherwise>
+                1=1
+            </otherwise>
+        </choose>
+    </select>
+    <resultMap id="brandResultMap" type="brand">
+        <result property="brandName" column="brand_name"/>
+        <result property="companyName" column="company_name"/>
+    </resultMap>
+</mapper>
