@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <button @click="clickHappen()">
+        click
+    </button>
+</div>
+</body>
+<script>
+    const {createApp} = Vue
+    createApp({
+        methods: {
+            clickHappen: function () {
+                console.log("click...")
+            }
+        }
+    }).mount('#app')
+</script>
+</html>

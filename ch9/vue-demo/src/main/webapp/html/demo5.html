@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <button @click="countPlus">
+        Count is: {{ count }}
+    </button>
+</div>
+</body>
+<script>
+    const {createApp} = Vue
+    createApp({
+        data: function () {
+            return {
+                count: 0
+            }
+        },
+        methods: {
+            countPlus: function () {
+                this.count++;
+            }
+        }
+    }).mount('#app')
+</script>
+</html>

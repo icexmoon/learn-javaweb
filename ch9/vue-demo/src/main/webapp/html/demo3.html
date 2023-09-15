@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    SearchEngine: {{se}}<br/>
+    <select v-model="se">
+        <option v-for="(engine,i) in engines" :value="engine.url">{{i}}-{{engine.name}}</option>
+    </select>
+    <a :href="se" target="_blank">Go Search</a>
+</div>
+</body>
+<script>
+    const { createApp } = Vue
+    createApp({
+        data() {
+            return {
+                se: "http://google.com",
+                engines: [
+                    {name: "百度", url: "http://baidu.com"},
+                    {name: "Bing", url: "https://cn.bing.com"},
+                    {name: "Google", url: "http://google.com"}
+                ]
+            }
+        }
+    }).mount('#app')
+</script>
+</html>
