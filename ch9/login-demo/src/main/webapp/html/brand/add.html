@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>添加品牌</title>
+    <script type="text/javascript" src="/login-demo/js/axios-0.18.0.js"></script>
+    <script type="text/javascript" src="/login-demo/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/login-demo/js/vue@3.3.4_dist_vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <h3>添加品牌</h3>
+    品牌名称：<input v-model="brand.brandName" name="brandName"><br>
+    企业名称：<input v-model="brand.companyName" name="companyName"><br>
+    排序：<input v-model="brand.ordered" name="ordered"><br>
+    描述信息：<textarea v-model="brand.description" rows="5" cols="20" name="description"></textarea><br>
+    状态：
+    <input v-model="brand.status" type="radio" name="status" value="1">禁用
+    <input v-model="brand.status" type="radio" name="status" value="0">启用<br>
+
+    <button @click="addBrand">提交</button>
+</div>
+</body>
+<script>
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {
+                brand: {
+                    brandName: "",
+                    companyName: "",
+                    ordered: 0,
+                    description: "",
+                    status: 0
+                }
+            }
+        },
+        methods: {
+            addBrand: function () {
+                console.log("here")
+                let _vue = this;
+                let brand = _vue.brand;
+                axios({
+                    method: "POST",
+                    url: "/login-demo/brand/add",
+                    data: {
+                        brandName: brand.brandName,
+                        companyName: brand.companyName,
+                        ordered: brand.ordered,
+                        description: brand.description,
+                        status: brand.status
+                    }
+                }).then((resp) => {
+                    if (resp.data.result) {
+                        // 跳转到列表页
+                        document.location = "/login-demo/html/brand/list.html";
+                    }
+                });
+            }
+        }
+    })
+        .mount("#app");
+</script>
+</html>

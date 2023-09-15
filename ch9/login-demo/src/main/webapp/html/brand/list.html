@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/login-demo/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/login-demo/js/axios-0.18.0.js"></script>
+    <script type="text/javascript" src="/login-demo/js/vue@3.3.4_dist_vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+    <h1 id="helloMsg">{{username}}，欢迎您</h1>
+    <a href="/login-demo/html/brand/add.html"><input type="button" value="新增"></a><br>
+    <hr>
+    <table id="brandsTable" border="1" cellspacing="0" width="800">
+        <tr>
+            <th>序号</th>
+            <th>品牌名称</th>
+            <th>企业名称</th>
+            <th>排序</th>
+            <th>品牌介绍</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        <tr align="center" v-for="(brand,index) in brands">
+            <td>{{index+1}}</td>
+            <td>{{brand.brandName}}</td>
+            <td>{{brand.companyName}}</td>
+            <td>{{brand.ordered}}</td>
+            <td>{{brand.description}}</td>
+            <td v-if="brand.status==0">启用</td>
+            <td v-else>禁用</td>
+            <td><a :href="brand.editUrl">修改</a>
+                <a :href="brand.deleteUrl">删除</a></td>
+        </tr>
+    </table>
+</div>
+</body>
+<script type="text/javascript">
+    const {createApp} = Vue
+    createApp({
+        data() {
+            return {
+                brands: [],
+                username: ""
+            };
+        },
+        mounted() {
+            let _vue = this;
+            axios({
+                method: "POST",
+                url: "/login-demo/brand/list",
+                data: {}
+            })
+                .then((resp) => {
+                    _vue.brands = resp.data;
+                    _vue.brands.forEach((brand) => {
+                        brand.editUrl = "/login-demo/brand/edit?id=" + brand.id;
+                        brand.deleteUrl = "/login-demo/brand/delete?id=" + brand.id;
+                    });
+                });
+            axios({
+                method: "GET",
+                url: "/login-demo/user/info",
+                data: {}
+            }).then((resp)=>{
+                _vue.username = resp.data.username;
+            });
+        }
+    }).mount('#app')
+</script>
+</html>
