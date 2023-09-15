@@ -20,7 +20,9 @@
         <th>状态</th>
         <th>操作</th>
     </tr>
-    <tr align="center" class="brandsRow" hidden="hidden">
+</table>
+<template id="rowTemplate">
+    <tr align="center">
         <td></td>
         <td></td>
         <td></td>
@@ -30,7 +32,7 @@
         <td><a href="/login-demo/brand/edit?id=#" class="edit">修改</a>
             <a href="/login-demo/brand/delete?id=#" class="delete">删除</a></td>
     </tr>
-</table>
+</template>
 </body>
 <script type="text/javascript">
     $(document).ready(function () {
@@ -51,7 +53,8 @@
 
     function loadBrandsTable() {
         let table = $("table#brandsTable");
-        let demoRow = table.find("tr.brandsRow:first");
+        // let demoRow = $("#rowTemplate").get(0).content.querySelector("tr");
+        let demoRow = $($("#rowTemplate").html()).get(0);
         // 获取品牌列表信息
         axios({
             "method": "POST",
@@ -60,8 +63,8 @@
             .then((resp)=>{
                 let brands = resp.data;
                 brands.map((brand)=>{
-                    let newRow = demoRow.clone();
-                    console.log(newRow);
+                    let newRow = $(demoRow).clone();
+                    // console.log(newRow);
                     fillRowData(newRow, brand);
                     table.find("tr:last").after(newRow);
                 });
