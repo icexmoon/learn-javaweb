@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/login-demo/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/login-demo/js/axios-0.18.0.js"></script>
+    <script type="text/javascript" src="/login-demo/js/vue@2.7.14_dist_vue.min.js"></script>
+    <script type="text/javascript" src="/login-demo/js/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="/login-demo/js/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1 id="helloMsg">{{username}}，欢迎您</h1>
+    <a href="/login-demo/html/brand/add.html"><input type="button" value="新增"></a><br>
+    <hr>
+    <el-form :inline="true" :model="query" class="demo-form-inline">
+        <el-form-item label="状态">
+            <el-select v-model="query.status" placeholder="状态">
+                <el-option label="启用" value="0"></el-option>
+                <el-option label="禁用" value="1"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="品牌名称">
+            <el-input v-model="query.brandName" placeholder="品牌名称"></el-input>
+        </el-form-item>
+        <el-form-item label="企业名称">
+            <el-input v-model="query.companyName" placeholder="企业名称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <el-row>
+        <el-button type="danger" @click="openBatchDeleteConfirm" plain>批量删除</el-button>
+        <el-button type="primary" @click="dialogVisible=true" plain>新增</el-button>
+    </el-row>
+    <el-dialog
+            title="新增品牌"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="品牌名称">
+                <el-input v-model="form.brandName"></el-input>
+            </el-form-item>
+            <el-form-item label="企业名称">
+                <el-input v-model="form.companyName"></el-input>
+            </el-form-item>
+            <el-form-item label="排序">
+                <el-input v-model="form.ordered"></el-input>
+            </el-form-item>
+            <el-form-item label="品牌介绍">
+                <el-input type="textarea" v-model="form.description"></el-input>
+            </el-form-item>
+            <el-form-item label="状态">
+                <el-switch v-model="form.status"
+                           active-value="0"
+                           inactive-value="1"></el-switch>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="onFormSubmit">确认</el-button>
+                <el-button @click="dialogVisible = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <template>
+        <el-table
+                :data="brands"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    type="index"
+                    label="序号">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    prop="brandName"
+                    label="品牌名称">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    prop="companyName"
+                    label="企业名称">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    prop="ordered"
+                    label="排序">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    prop="description"
+                    label="品牌介绍">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    prop="statusText"
+                    label="状态">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    label="操作">
+                <el-button type="primary">修改</el-button>
+                <el-button type="danger">删除</el-button>
+            </el-table-column>
+        </el-table>
+    </template>
+    <div class="block">
+        <span class="demonstration">分页</span>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="page.currentPage"
+                :page-sizes="[5, 10, 15, 20]"
+                :page-size="page.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="page.total">
+        </el-pagination>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    new Vue({
+        el: "#app",
+        methods: {
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+                console.log(this.multipleSelection);
+            },
+            onSubmit() {
+                console.log('submit!');
+                loadBrands(this);
+            },
+            onFormSubmit() {
+                // 新增品牌 dialog 提交
+                let _vue = this;
+                axios({
+                    method: "POST",
+                    url: "/login-demo/brand/add",
+                    data: _vue.form
+                }).then((resp) => {
+                    // 新增成功后刷新列表
+                    loadBrands(_vue);
+                    // 关闭对话框
+                    _vue.dialogVisible = false;
+                    // 重置对话框的绑定数据
+                    _vue.form = initFormData();
+                    _vue.$message({
+                        message: '添加品牌成功',
+                        type: 'success'
+                    });
+                });
+            },
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+                this.page.size=val;
+                loadBrands(this);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.page.currentPage=val;
+                loadBrands(this);
+            },
+            batchDeleteBrands() {
+                let ids = [];
+                this.multipleSelection.forEach((brand) => {
+                    ids.push(brand.id);
+                });
+                let _vue = this;
+                axios({
+                    method: "POST",
+                    url: "/login-demo/brand/batchDelete",
+                    data: ids
+                }).then((resp) => {
+                    loadBrands(_vue);
+                    _vue.$message({
+                        message: '批量删除成功',
+                        type: 'success'
+                    });
+                });
+            },
+            openBatchDeleteConfirm() {
+                this.$confirm('此操作将永久删除品牌, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.batchDeleteBrands();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            }
+        },
+        data() {
+            return {
+                username: "",
+                brands: [],
+                multipleSelection: [],
+                query: new Brand(),
+                dialogVisible: false,
+                form: initFormData(),
+                page: {
+                    currentPage: 1,
+                    pageSize: 5,
+                    total: 5
+                }
+            }
+        },
+        mounted() {
+            console.log(this.form);
+            loadBrands(this);
+        }
+    })
+
+    function loadBrands(_vue) {
+        axios({
+            method: "POST",
+            url: "/login-demo/brand/query",
+            data: {
+                query: _vue.query,
+                page: {
+                    size: _vue.page.pageSize,
+                    currentPage: _vue.page.currentPage
+                }
+            }
+        })
+            .then((resp) => {
+                _vue.brands = resp.data.list;
+                _vue.brands.forEach((brand) => {
+                    brand.editUrl = "/login-demo/brand/edit?id=" + brand.id;
+                    brand.deleteUrl = "/login-demo/brand/delete?id=" + brand.id;
+                    brand.statusText = brand.status === 0 ? "启用" : "禁用";
+                });
+                _vue.page.total = resp.data.resultPage.total;
+            });
+    }
+
+    function initFormData() {
+        let brand = new Brand();
+        brand.status = '0';
+        return brand;
+    }
+
+    function Brand() {
+        this.id = null;
+        this.brandName = '';
+        this.companyName = '';
+        this.ordered = null;
+        this.escription = '';
+        this.status = null;
+    }
+</script>
+</html>
